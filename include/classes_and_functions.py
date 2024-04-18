@@ -135,7 +135,7 @@ class Config(DotDict):
                 super().__init__(yaml.load(file))
             except:
                 error_line = (
-                    f"Error loading file at {config_input_file}: {exc_info()[0]}"
+                    f"Error loading file at {config_input_file} (Terminating error): {exc_info()[0]}"
                 )
                 print_and_log(self_name, error_line)
                 raise
@@ -498,13 +498,23 @@ def find_selinux_denials(settings: ScriptGlobals):
                     match_object = SELinuxMatch(log_match, i)
                     return_list[0].append(match_object)
                     return_list[1].append(match_object.hexdigest)
-    except:
+
+    except UnicodeDecodeError as e:
         print_and_log(
             self_name,
-            f"Error reading logfile: {settings.search_logfile}",
+            f"Error reading logfile (Continuing execution): {settings.search_logfile}. Exception: {exc_info()[0]}: {e}",
             settings=settings,
             log_file=settings.log_file,
         )
+
+    except:
+        print_and_log(
+            self_name,
+            f"Error reading logfile (Terminating error): {settings.search_logfile}",
+            settings=settings,
+            log_file=settings.log_file,
+        )
+        settings.mail.terminating_error = True
         raise
 
     return return_list
@@ -599,7 +609,7 @@ def generate_selinux_module(selinux_match: SELinuxMatch, settings: ScriptGlobals
             except Exception as e:
                 print_and_log(
                     self_name,
-                    f"Error inserting module: {selinux_match.modulename}. Exception: {exc_info()[0]}: {e}",
+                    f"Error inserting module (Terminating error): {selinux_match.modulename}. Exception: {exc_info()[0]}: {e}",
                     settings=settings,
                     log_file=settings.log_file,
                 )
@@ -678,7 +688,7 @@ of modules already generated.\nThe full runtime of the script was: {settings.end
     except Exception as e:
         print_and_log(
             self_name,
-            f"Error sending email: {str(e)}",
+            f"Error sending email (Terminating error): {str(e)}",
             settings=settings,
             append_mail=False,
         )
