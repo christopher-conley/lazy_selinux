@@ -141,7 +141,7 @@ parser.add_argument(
 )
 
 # version = datetime.now().strftime('%Y.%m.%d.%H%M')
-VERSION = "2024.04.05.0318"
+VERSION = "2024.04.18.1358"
 
 args = parser.parse_args()
 if args.version:
